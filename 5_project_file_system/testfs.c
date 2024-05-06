@@ -6,7 +6,7 @@
 
 #define BLOCK_SIZE 4096
 
-void test_bwrite_bread(void)
+void test_write_read(void)
 {
     unsigned char inbuffer[BLOCK_SIZE] = "Hello";
     unsigned char outbuffer[BLOCK_SIZE];
@@ -14,14 +14,14 @@ void test_bwrite_bread(void)
     CTEST_ASSERT(strcmp((char*)bread(0, outbuffer), "Hello") == 0, "Testing writing and reading from disk.\n");
 }
 
-void test_over_bwrite(void)
+void test_overwrite(void)
 {
-    unsigned char inbuffer[BLOCK_SIZE] = "Hello";
+    unsigned char inbuffer[BLOCK_SIZE] = "Hi";
     unsigned char inbuffer2[BLOCK_SIZE] = "Goodbye";
     unsigned char outbuffer[BLOCK_SIZE];
     unsigned char outbuffer2[BLOCK_SIZE];
     bwrite(0, inbuffer);
-    CTEST_ASSERT(strcmp((char*)bread(0, outbuffer), "Hello") == 0, "Testing initial writing and reading from disk.\n");
+    CTEST_ASSERT(strcmp((char*)bread(0, outbuffer), "Hi") == 0, "Testing initial writing and reading from disk.\n");
 
     bwrite(0, inbuffer2);
     CTEST_ASSERT(strcmp((char*)bread(0, outbuffer2), "Goodbye") == 0, "Testing if overwritten text is read correctly.\n");
