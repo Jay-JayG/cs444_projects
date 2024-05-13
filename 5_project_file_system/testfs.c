@@ -34,7 +34,7 @@ int main()
     int trunc = 1;
     image_open(file, trunc);
 
-    test_bwrite_bread();
+    test_write_read();
     test_over_bwrite();
 
     CTEST_RESULTS();
