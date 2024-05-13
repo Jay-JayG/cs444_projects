@@ -33,5 +33,5 @@ Command line:
   * `image_close(void)`: Closes the file descriptor opened in image_open() using close() and returns the result of the close().
  
 * `block.c`
-  * `bread(int block_num, unsigned char *block)`: Takes a block number and a pointer to a block sized char array. It will read the contents of the specified block from the disk into the provided block pointer.
+  * `bread(int block_num, unsigned char *block)`: Takes a block number and a pointer to a block sized char array. It will read the contents of the specified block from the disk into the provided block pointer. Returns that block pointer.
   * `bwrite(int block_num, unsigned char *block)`: Takes a block number and a pointer to a block sized char array. It will write the contents of the passed block pointer into the specified block on the disk.
