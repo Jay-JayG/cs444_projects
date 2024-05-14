@@ -15,6 +15,9 @@ Command line:
 * `block.h`: header file for block.c.
 * `libvvsfs.a`: Library file that contains the code from image.c and block.c.
 * `ctest.h`: Testing framework, contains macros for implementing testing.
+* `free.c`: Contains function for settign a bit to 1 or 0, for finding the index of a 0 bin in a byte, and for finding the lowest free bit in a block.
+* `free.h`: Header file for free.c.
+* `inode.c`: contains ialloc() and alloc() that allocate the 
 
 ## Data
 
