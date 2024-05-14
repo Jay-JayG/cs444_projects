@@ -14,11 +14,3 @@ int ialloc(void)
     bwrite(0, data);
     return index;
 }
-
-int alloc(void)
-{
-    int index = find_free(bread(1, data));
-    set_free(data, index, 1);
-    bwrite(1, data);
-    return index;
-}

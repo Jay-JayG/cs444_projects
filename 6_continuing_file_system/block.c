@@ -3,9 +3,11 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "image.h"
+#include "free.h"
 
 
 #define BLOCK_SIZE 4096
+unsigned char datablock[BLOCK_SIZE];
 
 unsigned char *bread(int block_num, unsigned char *block)
 {
@@ -25,4 +27,12 @@ void bwrite(int block_num, unsigned char *block)
     lseek(image_fd, offset, SEEK_SET);
 
     write(image_fd, block, BLOCK_SIZE);
+}
+
+int alloc(void)
+{
+    int index = find_free(bread(1, datablock));
+    set_free(datablock, index, 1);
+    bwrite(1, datablock);
+    return index;
 }
