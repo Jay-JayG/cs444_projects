@@ -1,5 +1,5 @@
 CC=gcc
-CCFLAGS=-Wall -Wextra -Werror -DCTEST_ENABLE
+CCFLAGS=-Wall -Wextra -Werror -DCTEST_ENABLE -g
 
 .PHONY: clean pristine
 
@@ -7,7 +7,7 @@ testfs: testfs.o libvvsfs.a
 	$(CC) $(CCFLAGS) testfs.o -L. -lvvsfs -o testfs
 testfs.o: testfs.c image.h block.h ctest.h free.h inode.h pack.h
 	$(CC) $(CCFLAGS) -c testfs.c
-libvvsfs.a: image.o block.o free.o inode.o
+libvvsfs.a: image.o block.o free.o inode.o pack.o
 	ar rcs $@ $^
 image.o: image.c
 	$(CC) $(CCFLAGS) -c image.c
@@ -28,3 +28,6 @@ pristine:
 	rm -f testfs libvvsfs.a
 	rm -f *.txt
 	rm -f free
+
+test:testfs
+	 ./testfs

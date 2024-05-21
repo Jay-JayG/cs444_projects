@@ -31,8 +31,8 @@ void bwrite(int block_num, unsigned char *block)
 
 int alloc(void)
 {
-    int index = find_free(bread(1, datablock));
+    int index = find_free(bread(2, datablock));
     set_free(datablock, index, 1);
-    bwrite(1, datablock);
+    bwrite(2, datablock);
     return index;
 }
