@@ -5,7 +5,7 @@
 #include "image.h"
 #include "free.h"
 
-
+#define FREE_BLOCK_MAP_NUM 2
 #define BLOCK_SIZE 4096
 unsigned char datablock[BLOCK_SIZE];
 
@@ -31,7 +31,7 @@ void bwrite(int block_num, unsigned char *block)
 
 int alloc(void)
 {
-    int index = find_free(bread(2, datablock));
+    int index = find_free(bread(FREE_BLOCK_MAP_NUM, datablock));
     set_free(datablock, index, 1);
     bwrite(2, datablock);
     return index;

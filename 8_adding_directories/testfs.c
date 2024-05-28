@@ -10,13 +10,17 @@
 #include "ls.h"
 
 #define BLOCK_SIZE 4096
+#define SUPERBLOCK_NUM 0
+#define FREE_INODE_MAP_NUM 1
+#define FREE_BLOCK_MAP_NUM 2
+#define INODE_DATA_BLOCK_NUM 3
 #define INODE_DATA_BLOCKS_START_OFFSET 4
 
 void test_write_read(void)
 {
     unsigned char inbuffer[BLOCK_SIZE] = "Hello";
     unsigned char outbuffer[BLOCK_SIZE];
-    bwrite(0, inbuffer);
+    bwrite(SUPERBLOCK_NUM, inbuffer);
     CTEST_ASSERT(strcmp((char*)bread(0, outbuffer), "Hello") == 0, "Testing writing and reading from disk.\n");
 }
 
@@ -25,9 +29,9 @@ void test_overwrite(void)
     unsigned char inbuffer[BLOCK_SIZE] = "Hi";
     unsigned char inbuffer2[BLOCK_SIZE] = "Goodbye";
     unsigned char outbuffer[BLOCK_SIZE];
-    bwrite(0, inbuffer);
+    bwrite(SUPERBLOCK_NUM, inbuffer);
 
-    bwrite(0, inbuffer2);
+    bwrite(SUPERBLOCK_NUM, inbuffer2);
     CTEST_ASSERT(strcmp((char*)bread(0, outbuffer), "Goodbye") == 0, "Testing if overwritten text is read correctly.");
 }
 
@@ -62,11 +66,11 @@ void test_inode_ialloc()
 {
     unsigned char outbuff[BLOCK_SIZE] = {0};
     ialloc();
-    bread(1, outbuff);
+    bread(FREE_INODE_MAP_NUM, outbuff);
     // printf("%d\n", outbuff[0]);
     CTEST_ASSERT(outbuff[0] == 0b00000001,  "Testing allocating inode and marking first inode as not free.");
     ialloc();
-    bread(1, outbuff);
+    bread(FREE_INODE_MAP_NUM), outbuff);
     CTEST_ASSERT(outbuff[0] == 0b00000011,  "Testing allocating inode and marking second inode as not free.");
 }
 
@@ -75,10 +79,10 @@ void test_block_alloc()
     unsigned char outbuff2[BLOCK_SIZE] = {0};
     // unsigned char outbuff2[BLOCK_SIZE];
     alloc();
-    bread(2, outbuff2);
+    bread(FREE_BLOCK_MAP_NUM, outbuff2);
     CTEST_ASSERT(outbuff2[0] == 0b00000001,  "Testing allocating block and marking first block as not free.");
     alloc();
-    bread(2, outbuff2);
+    bread(FREE_BLOCK_MAP_NUM, outbuff2);
     CTEST_ASSERT(outbuff2[0] == 0b00000011,  "Testing allocating block and marking second block as not free.");
 }
 
@@ -89,7 +93,7 @@ void test_inode_iget_iput_write_read()
 
     ialloc();
     ialloc();
-    bread(2, outbuff3);
+    bread(FREE_BLOCK_MAP_NUM, outbuff3);
     CTEST_ASSERT(iget(3)->ref_count == 2,  "Testing getting inode and reading ref count.");
 
     struct inode *temp = incore_find(0);
@@ -98,7 +102,7 @@ void test_inode_iget_iput_write_read()
     CTEST_ASSERT(incore_find(0)->ref_count == 1,  "Testing finding inode and reading ref count.");
     
     iput(temp);
-    bread(3, outbuff4);
+    bread(INODE_DATA_BLOCK_NUM, outbuff4);
     CTEST_ASSERT(read_u32(&outbuff4[0]) == 1,  "Testing iput, writing inode into disk and reading from disk previously set inode size is 1.");
 
 }
@@ -116,7 +120,7 @@ void test_mkfs()
     unsigned char outbuff5[BLOCK_SIZE] = {0};
     unsigned char outbuff6[BLOCK_SIZE] = {0};
     mkfs();
-    bread(2, outbuff5);
+    bread(FREE_BLOCK_MAP_NUM, outbuff5);
     CTEST_ASSERT(outbuff5[0] == 0b00000001,  "Testing allocating block and marking first block as not free for root directory.");
 
     bread(INODE_DATA_BLOCKS_START_OFFSET, outbuff6);
