@@ -20,25 +20,31 @@ Command line:
 * `free.h`: Header file for free.c.
 * `inode.c`: Contains functions for allocating, obtaining and writing inodes.
 * `inode.h`: Header file for inode.c.
+* `dir.c` : Contains functions for initializing the file system, for creating directory entries in the file system and for reading those entries.
+* `dir.h`: Header file for dir.c.
+* `ls.c`: Reads current and parent directory names.
+* `ls.h`: Header file for ls.c.
 
 ## Data
 
-- Hello.txt is a file created via the image_open() function from image.c. It imitates the functionality of a disk. Data is written and read from this file.
+- Text files .txt are created during testing to imitate an actual disk image. Sets of tests may overlap each other by writing different data to the same locations. For this reason any set of tests that may overlap create their own disk image via a text file. Text files are named after the set of tests they correspond to.
 
 ## Functions
 
 * `testf.c`
   * `main()`
-	* `image_open(file, trunc)`: Create/opens the disk.
-	* `test_write_read()`: Test function - Writes text into the disk file, then attempts to read that same text and check if it is the same.
-	* `test_over_bwrite()`: Test function - Writes text into the disk then writes over that text with some new text and reads the new text checking if it is the same.
-	* `test_set_first_bit()`: Tests setting first bit in first byte in block to 1.
-	* `test_set_ninth_bit()`: Tests setting first bit in second byte in block to 1.
-	* `test_free_first_bit()`: Tests setting first bit in first byte in block to 0.
-	* `test_free_ninth_bit()`: Tests setting first bit in second byte in block to 0.
-	* `test_inode_ialloc()`: Tests allocating first free inode.
-	* `test_inode_alloc()`: Tests allocating first free block.
-	* `test_inode_iget_iput_write_read()`: Tests iget() to get inode and checks its reference count is 2, uses read_inode(). Changes inode size to 1 and calls iput() to write inode into disk, then reads disk into memory and checks if write was conducted correctly.
+    * `image_open(file, trunc)`: Create/opens the disk.
+    * `test_write_read()`: Test function - Writes text into the disk file, then attempts to read that same text and check if it is the same.
+    * `test_over_bwrite()`: Test function - Writes text into the disk then writes over that text with some new text and reads the new text checking if it is the same.
+    * `test_set_first_bit()`: Tests setting first bit in first byte in block to 1.
+    * `test_set_ninth_bit()`: Tests setting first bit in second byte in block to 1.
+    * `test_free_first_bit()`: Tests setting first bit in first byte in block to 0.
+    * `test_free_ninth_bit()`: Tests setting first bit in second byte in block to 0.
+    * `test_inode_ialloc()`: Tests allocating first free inode.
+    * `test_inode_alloc()`: Tests allocating first free block.
+    * `test_inode_iget_iput_write_read()`: Tests iget() to get inode and checks its reference count is 2, uses read_inode(). Changes inode size to 1 and calls iput() to write inode into disk, then reads disk into memory and checks if write was conducted correctly.
+      * `test_mkfs()`: Tests creating the file system including the root directory's inode and asserting that the root dir point to the current dir and its parent which at the root is the same as the current dir.
+    * `test_directory_open_and_get()`: Tests opening a directory and creating a directory entry from it, then it tests that the directory holds the correct data by checking if it references the current directory and its parent.
 
 * `image.c`
   * `image_open(char *filename, int truncate)`: Creates/opens the disk. Opens a file descriptor and returns it.
@@ -61,3 +67,8 @@ Command line:
   * `incore_free_all(void)`: Sets all in core inodes' reference counts to 0.
   * `void read_inode(struct inode *in, int inode_num)`: Determines the block and block offset from which to read inode in disk from. Uses that data to fill out fields of inode struct passed in.
   * `void write_inode(struct inode *in)`: Determines the block number and offset for the location in disk that the passed in inode should be written to. Writes contents of inode into buffer. Writes buffer into disk.
+* `dir.c`
+  * `void mkfs()`: Obtains the first free inode and block from their corresponding map blocks. Initializes that inode as a directory inode specifically the root directory. Specifies the root's size, since it will contain references to two other directories at startup, the current and parent which at root is also current, totalying two directory entry sizes chucks amounting to 64 bytes. Writes those directory entries to the data blocks in disk and writes the inode to the inode blocks in disk.
+  * `struct directory *directory_open(int inode_num)`: Opens a directory by creating a directory struct and populating it with a pointer to specified inode and initializing it with an offset of 0.
+  * `int directory_get(struct directory *dir, struct directory_entry *ent)`: Obtains data of directory entries within a directory, will loop through all entries within the directory until it reaches the end. Will populate a directory_entry struct with the inodes and names of the directories obtained moving the offset each time.
+  * `void directory_close(struct directory *d)`: Closes a directory by writing it to disk and freeing it’s pointer.
