@@ -7,7 +7,7 @@
 #include "dirbasename.h"
 #define INITIAL_DIR_SIZE 64
 #define BLOCK_SIZE 4096
-#define INODE_DATA_BLOCKS_START_OFFSET 4
+#define FILE_DATA_BLOCK_START_OFFSET 7
 #define ROOT_INODE_NUM 0
 
 struct directory {
@@ -44,16 +44,16 @@ void mkfs()
 
     write_u16(&block[32], inode_num);
     strcpy((char *)block + 32 + 2, parent);
-
     // printf("Block content starting from the third byte: %s\n", block + 2);
     // printf("Block content starting from the 35th byte: %s\n", block + 32 + 2);
     
-    // printf("INODE_DATA_BLOCKS_START_OFFSET + returned_block_num: %d\n", INODE_DATA_BLOCKS_START_OFFSET + returned_block_num);
+
+    // printf("FILE_DATA_BLOCK_START_OFFSET + returned_block_num: %d\n", FILE_DATA_BLOCK_START_OFFSET + returned_block_num);
     printf("\n");
     printf("\n");
-    printf("block root is writen in: %d\n", INODE_DATA_BLOCKS_START_OFFSET + returned_block_num);
+    printf("block root is writen in: %d\n", FILE_DATA_BLOCK_START_OFFSET + returned_block_num);
     printf("\n");
-    bwrite(INODE_DATA_BLOCKS_START_OFFSET + returned_block_num, block);
+    bwrite(FILE_DATA_BLOCK_START_OFFSET + returned_block_num, block);
     iput(temp);
 }
 
@@ -92,7 +92,7 @@ int directory_get(struct directory *dir, struct directory_entry *ent)
     // printf("data_block_index: %d\n", data_block_index);
     int data_block_num = dir->inode->block_ptr[data_block_index]; // data_block_num contains index of first free block found form alloc.
     
-    bread(data_block_num + INODE_DATA_BLOCKS_START_OFFSET, block);
+    bread(data_block_num + FILE_DATA_BLOCK_START_OFFSET, block); // This is probalby wrong. But Why?
 
     int offset_in_block = offset % 4096;
     // printf("offset_in_block: %d\n", offset_in_block);
@@ -132,14 +132,17 @@ int directory_make(char *path)
     get_basename(path, dirname);
     //printf("dirname: %s\n", dirname);
     
+    // Obtain inode of root
     struct inode *root = namei(dirpath);
 
+    // Allocate inode of new dir
     struct inode *new_dir = ialloc();
     int inode_num = new_dir->inode_num;
     //printf("new dir inode_num: %d\n", inode_num);
     int returned_block_num = alloc();
     printf("returned_block_num: %d\n", returned_block_num);
     
+    // Prepare to write subordinate inodes into the inode blocks.
     unsigned char block[BLOCK_SIZE];
 
     new_dir->flags = 2;
@@ -155,22 +158,23 @@ int directory_make(char *path)
     write_u16(&block[32], ROOT_INODE_NUM);
     strcpy((char *)block + 32 + 2, parent);
 
-    bwrite(INODE_DATA_BLOCKS_START_OFFSET + returned_block_num, block);
+    bwrite(FILE_DATA_BLOCK_START_OFFSET + returned_block_num, block);
     
+
     unsigned int root_dir_size = root->size;
-    printf("dir root size: %d\n", root_dir_size);
+    // printf("dir root size: %d\n", root_dir_size);
     int *block_ptr = (int *)root->block_ptr;
     (void)block_ptr;
 
     // 10. Read that block into memory unless you're creating a new one (bread()), and add the new directory entry to it.
     // ? We would only create a new one if the first block was full right?
     unsigned char dir_block[BLOCK_SIZE];
-    // printf("block_ptr: %d\n", *block_ptr + INODE_DATA_BLOCKS_START_OFFSET);
-    bread(INODE_DATA_BLOCKS_START_OFFSET, dir_block);
+    // printf("block_ptr: %d\n", *block_ptr + FILE_DATA_BLOCK_START_OFFSET);
+    bread(FILE_DATA_BLOCK_START_OFFSET, dir_block);
 
     write_u16(&dir_block[0 + root_dir_size], inode_num);
     strcpy((char *)&dir_block[0 + 2 + root_dir_size], current);
-    bwrite(INODE_DATA_BLOCKS_START_OFFSET, dir_block);
+    bwrite(FILE_DATA_BLOCK_START_OFFSET, dir_block);
     root->size += 32;
 
     iput(new_dir);

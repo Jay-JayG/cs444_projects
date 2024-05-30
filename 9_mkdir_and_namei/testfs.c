@@ -15,6 +15,7 @@
 #define FREE_BLOCK_MAP_NUM 2
 #define INODE_DATA_BLOCK_NUM 3
 #define INODE_DATA_BLOCKS_START_OFFSET 4
+#define FILE_DATA_BLOCKS_START_OFFSET 7
 
 void test_write_read(void)
 {
@@ -123,7 +124,7 @@ void test_mkfs()
     bread(FREE_BLOCK_MAP_NUM, outbuff5);
     CTEST_ASSERT(outbuff5[0] == 0b00000001,  "Testing allocating block and marking first block as not free for root directory.");
 
-    bread(INODE_DATA_BLOCKS_START_OFFSET, outbuff6);
+    bread(FILE_DATA_BLOCKS_START_OFFSET, outbuff6);
     CTEST_ASSERT(strcmp((char *)outbuff6 + 2, ".") == 0,  "Testing current directory file name \".\" written to data block.");
     CTEST_ASSERT(strcmp((char *)outbuff6 + 32 + 2, "..") == 0,  "Testing parent directory file name \"..\" written to data block.");
 }
@@ -155,9 +156,9 @@ void test_namei()
     CTEST_ASSERT(root_inode->size == 64,  "Testing namei() acutally obtains root inode whose size should be 64 if not blank.");
 }
 
-void test_directory_make()
+void test_directory_make(char *dir_name)
 {
-    directory_make("/foo");
+    directory_make(dir_name);
     ls();
 }
 
@@ -198,10 +199,14 @@ int main()
     
     test_mkfs();
     test_directory_open_and_get();
+    
 
     //namei() & directory_make() tests
     test_namei();
-    test_directory_make();
+    char dir_name_1[] = "/foo";
+    char dir_name_2[] = "/baz";
+    test_directory_make(dir_name_1);
+    test_directory_make(dir_name_2);
     image_close();
 
 
