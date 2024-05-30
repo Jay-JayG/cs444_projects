@@ -72,3 +72,5 @@ Command line:
   * `struct directory *directory_open(int inode_num)`: Opens a directory by creating a directory struct and populating it with a pointer to specified inode and initializing it with an offset of 0.
   * `int directory_get(struct directory *dir, struct directory_entry *ent)`: Obtains data of directory entries within a directory, will loop through all entries within the directory until it reaches the end. Will populate a directory_entry struct with the inodes and names of the directories obtained moving the offset each time.
   * `void directory_close(struct directory *d)`: Closes a directory by writing it to disk and freeing it’s pointer.
+  * `struct inode *namei(char *path)`: From a path gets the associated inode form the file. Currently voids the path and instead obtains the root inode.
+  * `int directory_make(char *path)`: Creates directories in the root diriectorie. Seperates the path into root directory and new directory name. Obtains the inode of the root node. Allocaates a news inode for the new dir. Allocates a new block for storing the directory entries.
