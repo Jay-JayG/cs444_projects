@@ -34,8 +34,8 @@ void mkfs()
 
     temp->flags = 2;
     temp->size = INITIAL_DIR_SIZE;
-    temp->block_ptr[0] = returned_block_num; // Fist free block index numebr set here.
-
+    temp->block_ptr[0] = FILE_DATA_BLOCK_START_OFFSET + returned_block_num; // Fist free block index numebr set here.
+    printf("block pointer: %d\n", FILE_DATA_BLOCK_START_OFFSET + returned_block_num);
     const char *current = ".";
     const char *parent = "..";
     
@@ -92,8 +92,8 @@ int directory_get(struct directory *dir, struct directory_entry *ent)
     // printf("data_block_index: %d\n", data_block_index);
     int data_block_num = dir->inode->block_ptr[data_block_index]; // data_block_num contains index of first free block found form alloc.
     
-    bread(data_block_num + FILE_DATA_BLOCK_START_OFFSET, block); // This is probalby wrong. But Why?
-
+    bread(data_block_num, block); // This is probalby wrong. But Why?
+    printf("data block number + 7: %d\n", data_block_num + FILE_DATA_BLOCK_START_OFFSET);
     int offset_in_block = offset % 4096;
     // printf("offset_in_block: %d\n", offset_in_block);
 
