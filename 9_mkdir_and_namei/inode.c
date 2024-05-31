@@ -125,7 +125,7 @@ void write_inode(struct inode *in)
     write_u16(&buffer[block_offset_bytes + 35], in->block_ptr[13]);
     write_u16(&buffer[block_offset_bytes + 36], in->block_ptr[14]);
     write_u16(&buffer[block_offset_bytes + 39], in->block_ptr[15]);
-    printf("Inode block num: %d\n", block_num);
+    
     bwrite(block_num, buffer);
 }
 
