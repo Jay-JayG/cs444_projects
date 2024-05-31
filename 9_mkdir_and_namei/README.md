@@ -24,6 +24,8 @@ Command line:
 * `dir.h`: Header file for dir.c.
 * `ls.c`: Reads current and parent directory names.
 * `ls.h`: Header file for ls.c.
+* `dirbasename.c`: Contains helper functions for finding directory to put new directory in and for finding name of new directory from a path string.
+* `dirbasename.h`: Header file for dirbasename.c.
 
 ## Data
 
@@ -33,18 +35,18 @@ Command line:
 
 * `testf.c`
   * `main()`
-    * `image_open(file, trunc)`: Create/opens the disk.
-    * `test_write_read()`: Test function - Writes text into the disk file, then attempts to read that same text and check if it is the same.
-    * `test_over_bwrite()`: Test function - Writes text into the disk then writes over that text with some new text and reads the new text checking if it is the same.
-    * `test_set_first_bit()`: Tests setting first bit in first byte in block to 1.
-    * `test_set_ninth_bit()`: Tests setting first bit in second byte in block to 1.
-    * `test_free_first_bit()`: Tests setting first bit in first byte in block to 0.
-    * `test_free_ninth_bit()`: Tests setting first bit in second byte in block to 0.
-    * `test_inode_ialloc()`: Tests allocating first free inode.
-    * `test_inode_alloc()`: Tests allocating first free block.
-    * `test_inode_iget_iput_write_read()`: Tests iget() to get inode and checks its reference count is 2, uses read_inode(). Changes inode size to 1 and calls iput() to write inode into disk, then reads disk into memory and checks if write was conducted correctly.
-      * `test_mkfs()`: Tests creating the file system including the root directory's inode and asserting that the root dir point to the current dir and its parent which at the root is the same as the current dir.
-    * `test_directory_open_and_get()`: Tests opening a directory and creating a directory entry from it, then it tests that the directory holds the correct data by checking if it references the current directory and its parent.
+	* `image_open(file, trunc)`: Create/opens the disk.
+	* `test_write_read()`: Test function - Writes text into the disk file, then attempts to read that same text and check if it is the same.
+	* `test_over_bwrite()`: Test function - Writes text into the disk then writes over that text with some new text and reads the new text checking if it is the same.
+	* `test_set_first_bit()`: Tests setting first bit in first byte in block to 1.
+	* `test_set_ninth_bit()`: Tests setting first bit in second byte in block to 1.
+	* `test_free_first_bit()`: Tests setting first bit in first byte in block to 0.
+	* `test_free_ninth_bit()`: Tests setting first bit in second byte in block to 0.
+	* `test_inode_ialloc()`: Tests allocating first free inode.
+	* `test_inode_alloc()`: Tests allocating first free block.
+	* `test_inode_iget_iput_write_read()`: Tests iget() to get inode and checks its reference count is 2, uses read_inode(). Changes inode size to 1 and calls iput() to write inode into disk, then reads disk into memory and checks if write was conducted correctly.
+  	* `test_mkfs()`: Tests creating the file system including the root directory's inode and asserting that the root dir points to the current dir and its parent which at the root is the same as the current dir.
+	* `test_directory_open_and_get()`: Tests opening a directory and creating a directory entry from it, then it tests that the directory holds the correct data by checking if it references the current directory and its parent.
 
 * `image.c`
   * `image_open(char *filename, int truncate)`: Creates/opens the disk. Opens a file descriptor and returns it.
@@ -69,8 +71,8 @@ Command line:
   * `void write_inode(struct inode *in)`: Determines the block number and offset for the location in disk that the passed in inode should be written to. Writes contents of inode into buffer. Writes buffer into disk.
 * `dir.c`
   * `void mkfs()`: Obtains the first free inode and block from their corresponding map blocks. Initializes that inode as a directory inode specifically the root directory. Specifies the root's size, since it will contain references to two other directories at startup, the current and parent which at root is also current, totalying two directory entry sizes chucks amounting to 64 bytes. Writes those directory entries to the data blocks in disk and writes the inode to the inode blocks in disk.
-  * `struct directory *directory_open(int inode_num)`: Opens a directory by creating a directory struct and populating it with a pointer to specified inode and initializing it with an offset of 0.
+  * `struct directory *directory_open(int inode_num)`: Opens a directory by creating a directory struct and populating it with a pointer to specific inode and initializing it with an offset of 0.
   * `int directory_get(struct directory *dir, struct directory_entry *ent)`: Obtains data of directory entries within a directory, will loop through all entries within the directory until it reaches the end. Will populate a directory_entry struct with the inodes and names of the directories obtained moving the offset each time.
-  * `void directory_close(struct directory *d)`: Closes a directory by writing it to disk and freeing it’s pointer.
-  * `struct inode *namei(char *path)`: From a path gets the associated inode form the file. Currently voids the path and instead obtains the root inode.
-  * `int directory_make(char *path)`: Creates directories in the root diriectorie. Seperates the path into root directory and new directory name. Obtains the inode of the root node. Allocaates a news inode for the new dir. Allocates a new block for storing the directory entries.
+  * `void directory_close(struct directory *d)`: Closes a directory by writing it to disk and freeing its pointer.
+  * `struct inode *namei(char *path)`: From a path gets the associated inode from the file. Currently voids the path and instead obtains the root inode.
+  * `int directory_make(char *path)`: Creates directories in the root directory. Separates the path into root directory and new directory name. Obtains the inode of the root node. Allocates a new inode for the new dir. Allocates a new block for storing the directory entries. Writes directory entries into the file block dedicated to this new directory entry. Writes a new directory into the root directory's file block. Write changes to root inode's new size into disk. Writes new directory inode into disk.
